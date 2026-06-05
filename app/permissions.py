@@ -9,6 +9,8 @@ ROLES = {
 
 PERMISSIONS = {
     'create_request': ['APPLICANT'],
+    'export_requests': ['APPLICANT', 'REVIEWER', 'APPROVER'],
+    'import_requests': ['APPLICANT'],
     'review_request': ['REVIEWER'],
     'approve_request': ['APPROVER'],
     'withdraw_request': ['APPLICANT'],

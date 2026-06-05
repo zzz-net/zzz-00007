@@ -25,6 +25,7 @@ else:
     print('未找到已撤回的申请，创建新的...')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '测试申请',
         'system_id': 1,
         'window_start': '2027-02-01T00:00:00Z',
         'window_end': '2027-02-01T23:59:59Z',

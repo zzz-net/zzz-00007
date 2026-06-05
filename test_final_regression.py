@@ -30,6 +30,7 @@ def test_final_regression():
     print('\n1. 创建新申请')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'lisi',
+        'title': '最终回归测试',
         'system_id': 'USER-SERVICE',
         'window_start': '2027-01-01T00:00:00Z',
         'window_end': '2027-01-10T23:59:59Z',

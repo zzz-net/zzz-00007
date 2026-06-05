@@ -23,6 +23,7 @@ def test_main_flow():
     print('\n1. 申请人提交申请')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '支付网关漏洞修复',
         'system_id': 'PAYMENT-SYSTEM',
         'window_start': '2026-06-10T00:00:00Z',
         'window_end': '2026-06-15T23:59:59Z',
@@ -64,6 +65,7 @@ def test_withdraw_and_re_effective():
     print('\n1. 创建新申请')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'lisi',
+        'title': '用户服务性能优化',
         'system_id': 'USER-SERVICE',
         'window_start': '2026-07-01T00:00:00Z',
         'window_end': '2026-07-05T23:59:59Z',
@@ -110,6 +112,7 @@ def test_failure_paths():
     print('\n1. 创建新申请用于测试')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '订单系统重构',
         'system_id': 'ORDER-SYSTEM',
         'window_start': '2026-08-01T00:00:00Z',
         'window_end': '2026-08-10T23:59:59Z',
@@ -133,6 +136,7 @@ def test_failure_paths():
     print('\n[失败3] 窗口期重叠 - 先创建一个已批准的申请')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'lisi',
+        'title': '库存系统升级',
         'system_id': 'INVENTORY-SYSTEM',
         'window_start': '2026-09-01T00:00:00Z',
         'window_end': '2026-09-10T23:59:59Z',
@@ -151,6 +155,7 @@ def test_failure_paths():
     print('\n[失败3] 窗口期重叠 - 再创建重叠窗口的申请')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '另一个库存变更',
         'system_id': 'INVENTORY-SYSTEM',
         'window_start': '2026-09-05T00:00:00Z',
         'window_end': '2026-09-15T23:59:59Z',
@@ -175,6 +180,7 @@ def test_failure_paths():
     print('\n[失败6] 无效风险等级')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '无效风险等级测试',
         'system_id': 'ORDER-SYSTEM',
         'window_start': '2026-10-01T00:00:00Z',
         'window_end': '2026-10-05T23:59:59Z',
@@ -186,6 +192,7 @@ def test_failure_paths():
     print('\n[失败7] 无效日期格式')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '无效日期格式测试',
         'system_id': 'ORDER-SYSTEM',
         'window_start': '2026-10-01',
         'window_end': '2026-10-05',

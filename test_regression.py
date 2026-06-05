@@ -30,6 +30,7 @@ def test_regression():
     print('\n1. 创建新申请')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '回归测试撤回验证',
         'system_id': 'ORDER-SYSTEM',
         'window_start': '2026-11-01T00:00:00Z',
         'window_end': '2026-11-10T23:59:59Z',

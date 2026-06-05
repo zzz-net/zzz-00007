@@ -61,6 +61,7 @@ def verify_data():
     print('\n3. 验证窗口期冲突判断')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '验证窗口冲突',
         'system_id': 'INVENTORY-SYSTEM',
         'window_start': '2026-09-03T00:00:00Z',
         'window_end': '2026-09-07T23:59:59Z',
@@ -80,6 +81,7 @@ def verify_data():
     print('\n4. 验证无效日期格式')
     r = requests.post(f'{BASE_URL}/requests', json={
         'username': 'zhangsan',
+        'title': '验证日期格式',
         'system_id': 'ORDER-SYSTEM',
         'window_start': '2026-10-01',
         'window_end': '2026-10-05',

@@ -27,6 +27,7 @@ class User(db.Model):
 class ChangeRequest(db.Model):
     __tablename__ = 'change_requests'
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
     system_id = db.Column(db.Integer, db.ForeignKey('systems.id'), nullable=False)
     system = db.relationship('System', backref='requests')
     applicant_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -39,11 +40,38 @@ class ChangeRequest(db.Model):
     window_end = db.Column(db.DateTime, nullable=False)
     risk_level = db.Column(db.String(20), nullable=False)
     reason = db.Column(db.String(1000), nullable=False)
+    remark = db.Column(db.String(500))
     status = db.Column(db.String(30), nullable=False, default='PENDING_REVIEW')
     review_comment = db.Column(db.String(500))
     approval_comment = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class ImportBatch(db.Model):
+    __tablename__ = 'import_batches'
+    id = db.Column(db.Integer, primary_key=True)
+    batch_no = db.Column(db.String(50), unique=True, nullable=False)
+    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    operator = db.relationship('User', backref='import_batches')
+    total_count = db.Column(db.Integer, nullable=False, default=0)
+    success_count = db.Column(db.Integer, nullable=False, default=0)
+    fail_count = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class ImportRecord(db.Model):
+    __tablename__ = 'import_records'
+    id = db.Column(db.Integer, primary_key=True)
+    batch_id = db.Column(db.Integer, db.ForeignKey('import_batches.id'), nullable=False)
+    batch = db.relationship('ImportBatch', backref='records')
+    row_no = db.Column(db.Integer, nullable=False)
+    success = db.Column(db.Boolean, nullable=False)
+    error_code = db.Column(db.String(50))
+    error_message = db.Column(db.String(500))
+    request_id = db.Column(db.Integer, db.ForeignKey('change_requests.id'))
+    request = db.relationship('ChangeRequest', backref='import_records')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class StatusHistory(db.Model):
@@ -55,5 +83,7 @@ class StatusHistory(db.Model):
     to_status = db.Column(db.String(30), nullable=False)
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     operator = db.relationship('User', backref='status_operations')
+    batch_id = db.Column(db.Integer, db.ForeignKey('import_batches.id'))
+    batch = db.relationship('ImportBatch', backref='status_history')
     comment = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

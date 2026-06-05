@@ -1,6 +1,6 @@
 from datetime import datetime
 from app import db
-from app.models import Role, System, User, ChangeRequest, StatusHistory
+from app.models import Role, System, User, ChangeRequest, StatusHistory, ImportBatch, ImportRecord
 
 
 def get_role_by_name(name):
@@ -52,19 +52,21 @@ def get_all_requests():
     return ChangeRequest.query.order_by(ChangeRequest.created_at.desc()).all()
 
 
-def create_request(system_id, applicant_id, window_start, window_end, risk_level, reason):
+def create_request(system_id, applicant_id, window_start, window_end, risk_level, reason, title=None, remark=None, batch_id=None):
     request = ChangeRequest(
+        title=title or f'{risk_level}级变更-{system_id}',
         system_id=system_id,
         applicant_id=applicant_id,
         window_start=window_start,
         window_end=window_end,
         risk_level=risk_level,
         reason=reason,
+        remark=remark,
         status='PENDING_REVIEW'
     )
     db.session.add(request)
     db.session.flush()
-    add_status_history(request.id, None, 'PENDING_REVIEW', applicant_id, '提交申请')
+    add_status_history(request.id, None, 'PENDING_REVIEW', applicant_id, '提交申请', batch_id)
     db.session.commit()
     return request
 
@@ -94,12 +96,13 @@ def set_approver(request_id, approver_id, comment=None):
     return request
 
 
-def add_status_history(request_id, from_status, to_status, operator_id, comment=None):
+def add_status_history(request_id, from_status, to_status, operator_id, comment=None, batch_id=None):
     history = StatusHistory(
         request_id=request_id,
         from_status=from_status,
         to_status=to_status,
         operator_id=operator_id,
+        batch_id=batch_id,
         comment=comment
     )
     db.session.add(history)
@@ -127,3 +130,64 @@ def check_window_conflict(system_id, window_start, window_end, exclude_request_i
     if exclude_request_id:
         query = query.filter(ChangeRequest.id != exclude_request_id)
     return query.first() is not None
+
+
+def get_visible_requests(user):
+    role_name = user.role.name
+    if role_name == 'APPLICANT':
+        return ChangeRequest.query.filter_by(
+            applicant_id=user.id
+        ).order_by(ChangeRequest.created_at.desc()).all()
+    else:
+        return ChangeRequest.query.order_by(ChangeRequest.created_at.desc()).all()
+
+
+def create_import_batch(batch_no, operator_id, total_count=0):
+    batch = ImportBatch(
+        batch_no=batch_no,
+        operator_id=operator_id,
+        total_count=total_count,
+        success_count=0,
+        fail_count=0
+    )
+    db.session.add(batch)
+    db.session.commit()
+    return batch
+
+
+def update_import_batch(batch_id, success_count, fail_count):
+    batch = ImportBatch.query.get(batch_id)
+    batch.success_count = success_count
+    batch.fail_count = fail_count
+    db.session.commit()
+    return batch
+
+
+def get_import_batch_by_no(batch_no):
+    return ImportBatch.query.filter_by(batch_no=batch_no).first()
+
+
+def create_import_record(batch_id, row_no, success, error_code=None, error_message=None, request_id=None):
+    record = ImportRecord(
+        batch_id=batch_id,
+        row_no=row_no,
+        success=success,
+        error_code=error_code,
+        error_message=error_message,
+        request_id=request_id
+    )
+    db.session.add(record)
+    db.session.commit()
+    return record
+
+
+def get_import_records_by_batch(batch_id):
+    return ImportRecord.query.filter_by(batch_id=batch_id).order_by(ImportRecord.row_no.asc()).all()
+
+
+def get_import_batch_by_id(batch_id):
+    return ImportBatch.query.get(batch_id)
+
+
+def get_all_import_batches():
+    return ImportBatch.query.order_by(ImportBatch.created_at.desc()).all()

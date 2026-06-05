@@ -4,9 +4,9 @@ from app.models import Role, System, User
 
 def init_database():
     roles_data = [
-        ('APPLICANT', '申请人：提交变更冻结例外申请，可撤回自己的申请'),
+        ('APPLICANT', '申请人：提交变更冻结例外申请，可撤回自己的申请。撤回是终态，不可再变更'),
         ('REVIEWER', '风险复核人：对申请进行风险评估和复核'),
-        ('APPROVER', '审批人：对已复核通过的申请进行审批，可生效或再次批准撤回的申请')
+        ('APPROVER', '审批人：对已复核通过的申请进行审批、生效。撤回是终态，不可再变更')
     ]
 
     for name, description in roles_data:

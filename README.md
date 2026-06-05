@@ -199,15 +199,7 @@ curl -X POST http://127.0.0.1:5000/api/requests/1/withdraw \
   }'
 ```
 
-#### 6. 撤回后再次批准
-```bash
-curl -X POST http://127.0.0.1:5000/api/requests/1/re-effective \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "qianqi",
-    "comment": "重新评估后同意再次批准"
-  }'
-```
+> **重要**: 撤回是终态操作。申请一旦撤回，状态保持为 WITHDRAWN，无法再次批准、生效或通过任何接口修改，审计历史也不会新增记录。如需重新申请，请创建新的变更申请。
 
 ### 审计记录
 
@@ -215,6 +207,23 @@ curl -X POST http://127.0.0.1:5000/api/requests/1/re-effective \
 ```bash
 curl "http://127.0.0.1:5000/api/audit?username=zhangsan"
 ```
+
+
+#### 按申请ID过滤审计日志
+
+**接口格式:** `/api/audit?username=...&request_id=...`
+
+```bash
+# 只返回指定申请的审计记录
+curl "http://127.0.0.1:5000/api/audit?username=zhangsan&request_id=1"
+```
+
+**参数说明:**
+- `username`: 必需，用于权限验证
+- `request_id`: 可选，整数，用于过滤指定申请的审计记录
+  - 不传或传空值：返回全量审计记录
+  - 传非整数：返回 400 错误 `INVALID_REQUEST_ID`
+  - 传不存在的申请ID：返回 404 错误 `REQUEST_NOT_FOUND`
 
 #### 查询单个申请的状态历史
 ```bash
@@ -312,9 +321,9 @@ curl -X POST http://127.0.0.1:5000/api/requests \
 }
 ```
 
-### 4. 撤回后再次生效（非已撤回状态）
+### 4. 撤回后尝试再次批准
 ```bash
-# 申请状态为 APPROVED 时尝试再次生效
+# 申请状态为 WITHDRAWN 时尝试再次批准
 curl -X POST http://127.0.0.1:5000/api/requests/1/re-effective \
   -H "Content-Type: application/json" \
   -d '{"username": "qianqi"}'
@@ -324,8 +333,40 @@ curl -X POST http://127.0.0.1:5000/api/requests/1/re-effective \
 {
   "success": false,
   "error": {
-    "code": "NOT_WITHDRAWN",
-    "message": "只有已撤回的申请才能再次生效"
+    "code": "WITHDRAWN_FINAL_STATE",
+    "message": "申请已撤回，是终态，无法再次批准或生效。如需重新申请，请创建新的变更申请"
+  }
+}
+```
+
+### 5. 审计查询使用无效的 request_id
+```bash
+# 使用非整数的 request_id
+curl "http://127.0.0.1:5000/api/audit?username=zhangsan&request_id=abc"
+```
+**返回错误:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_REQUEST_ID",
+    "message": "request_id 参数无效，必须是整数: abc"
+  }
+}
+```
+
+### 6. 审计查询使用不存在的 request_id
+```bash
+# 使用不存在的 request_id
+curl "http://127.0.0.1:5000/api/audit?username=zhangsan&request_id=99999"
+```
+**返回错误:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "REQUEST_NOT_FOUND",
+    "message": "申请不存在: 99999"
   }
 }
 ```
@@ -354,7 +395,8 @@ curl -X POST http://127.0.0.1:5000/api/requests/1/re-effective \
 | `NOT_REVIEWED` | 未经过风险复核 |
 | `REVIEW_REJECTED` | 已被复核拒绝 |
 | `ALREADY_EFFECTIVE` | 已生效，无法撤回 |
-| `NOT_WITHDRAWN` | 非已撤回状态，无法再次生效 |
+| `WITHDRAWN_FINAL_STATE` | 申请已撤回，是终态，无法再次批准或生效。状态保持 WITHDRAWN，审计历史不新增记录 |
+| `INVALID_REQUEST_ID` | request_id 参数无效，必须是整数 |
 | `USER_NOT_FOUND` | 用户不存在 |
 | `ROLE_PERMISSION_DENIED` | 角色无权限 |
 | `NOT_APPLICANT` | 非申请人本人 |

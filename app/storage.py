@@ -110,8 +110,11 @@ def get_status_history_by_request(request_id):
     return StatusHistory.query.filter_by(request_id=request_id).order_by(StatusHistory.created_at.asc()).all()
 
 
-def get_all_status_history():
-    return StatusHistory.query.order_by(StatusHistory.created_at.desc()).all()
+def get_all_status_history(request_id=None):
+    query = StatusHistory.query
+    if request_id is not None:
+        query = query.filter_by(request_id=request_id)
+    return query.order_by(StatusHistory.created_at.desc()).all()
 
 
 def check_window_conflict(system_id, window_start, window_end, exclude_request_id=None):

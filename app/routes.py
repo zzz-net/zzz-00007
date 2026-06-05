@@ -395,7 +395,27 @@ def get_audit_log():
 
         validate_and_get_user(username, 'view_audit')
 
-        history = storage.get_all_status_history()
+        request_id_param = data.get('request_id')
+        request_id = None
+        if request_id_param is not None and request_id_param != '':
+            try:
+                request_id = int(request_id_param)
+            except ValueError:
+                return error_response(
+                    f'request_id 参数无效，必须是整数: {request_id_param}',
+                    'INVALID_REQUEST_ID',
+                    400
+                )
+
+            req = storage.get_request_by_id(request_id)
+            if not req:
+                return error_response(
+                    f'申请不存在: {request_id}',
+                    'REQUEST_NOT_FOUND',
+                    404
+                )
+
+        history = storage.get_all_status_history(request_id)
         return success_response([serialize_history(h) for h in history])
     except PermissionError as e:
         return error_response(e.message, e.code, 403)

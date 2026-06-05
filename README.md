@@ -61,12 +61,12 @@ python run.py
 ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
 │    REVIEWED     │   │ REVIEW_REJECTED │   │   WITHDRAWN     │
 │   （复核通过）  │   │  （复核拒绝）   │   │   （已撤回）    │
-└────────┬────────┘   └─────────────────┘   └────────┬────────┘
-          │                                            ▲
-          ▼                                            │
-┌─────────────────┐                                    │
-│    APPROVED     │◄───────────────────────────────────┘
-│   （已批准）    │        撤回后再次批准 (APPROVER)
+└────────┬────────┘   └─────────────────┘   └─────────────────┘
+          │                                    （终态，不可再变更）
+          ▼
+┌─────────────────┐
+│    APPROVED     │
+│   （已批准）    │
 └────────┬────────┘
           │
           ▼
@@ -83,8 +83,8 @@ python run.py
 | REVIEWED         | APPROVED, REVIEW_REJECTED, WITHDRAWN | APPROVER(审批)/APPLICANT(撤回) |
 | REVIEW_REJECTED  | WITHDRAWN                   | APPLICANT  |
 | APPROVED         | EFFECTIVE, WITHDRAWN        | APPROVER(生效)/APPLICANT(撤回) |
-| EFFECTIVE        | -                           | -          |
-| WITHDRAWN        | APPROVED                    | APPROVER   |
+| EFFECTIVE        | WITHDRAWN                   | APPLICANT  |
+| WITHDRAWN        | -                           | -          |
 
 ## API 接口
 

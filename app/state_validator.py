@@ -17,7 +17,7 @@ VALID_TRANSITIONS = {
     'REVIEW_REJECTED': ['WITHDRAWN'],
     'APPROVED': ['EFFECTIVE', 'WITHDRAWN'],
     'EFFECTIVE': ['WITHDRAWN'],
-    'WITHDRAWN': ['APPROVED']
+    'WITHDRAWN': []
 }
 
 RISK_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
@@ -104,6 +104,11 @@ def validate_review_before_approval(request_status):
             '申请已被复核拒绝，无法批准',
             'REVIEW_REJECTED'
         )
+    if request_status == 'WITHDRAWN':
+        raise StateValidationError(
+            '申请已撤回，是终态，无法批准。如需重新申请，请创建新的变更申请',
+            'WITHDRAWN_FINAL_STATE'
+        )
 
 
 def validate_withdraw_before_effective(request_status):
@@ -115,8 +120,12 @@ def validate_withdraw_before_effective(request_status):
 
 
 def validate_re_effective(request_status):
-    if request_status != 'WITHDRAWN':
+    if request_status == 'WITHDRAWN':
         raise StateValidationError(
-            '只有已撤回的申请才能再次生效',
-            'NOT_WITHDRAWN'
+            '申请已撤回，是终态，无法再次批准或生效。如需重新申请，请创建新的变更申请',
+            'WITHDRAWN_FINAL_STATE'
         )
+    raise StateValidationError(
+        '只有已撤回的申请才能再次生效',
+        'NOT_WITHDRAWN'
+    )

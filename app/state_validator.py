@@ -41,6 +41,11 @@ def validate_status(status):
 def validate_transition(from_status, to_status):
     validate_status(from_status)
     validate_status(to_status)
+    if from_status == 'WITHDRAWN':
+        raise StateValidationError(
+            '申请已撤回，是终态，无法变更状态。如需重新申请，请创建新的变更申请',
+            'WITHDRAWN_FINAL_STATE'
+        )
     if to_status not in VALID_TRANSITIONS.get(from_status, []):
         raise StateValidationError(
             f'不允许的状态转换: {from_status} -> {to_status}。'
@@ -125,7 +130,3 @@ def validate_re_effective(request_status):
             '申请已撤回，是终态，无法再次批准或生效。如需重新申请，请创建新的变更申请',
             'WITHDRAWN_FINAL_STATE'
         )
-    raise StateValidationError(
-        '只有已撤回的申请才能再次生效',
-        'NOT_WITHDRAWN'
-    )

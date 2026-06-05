@@ -135,10 +135,10 @@ def test_final_regression():
     })
     data = r.json()
     test3 = (not data['success'] and 
-             data['error']['code'] == 'INVALID_TRANSITION' and
+             data['error']['code'] == 'WITHDRAWN_FINAL_STATE' and
              r.status_code == 400)
     all_pass &= test3
-    print(f'   {"✅" if test3 else "❌"} 返回 INVALID_TRANSITION 错误')
+    print(f'   {"✅" if test3 else "❌"} 返回 WITHDRAWN_FINAL_STATE 错误')
 
     # 验证状态不变
     r = requests.get(f'{BASE_URL}/requests/{request_id}', params={'username': 'lisi'})

@@ -107,8 +107,8 @@ print(f'   状态码: {r.status_code}')
 error_code = data.get('error', {}).get('code')
 print(f'   错误码: {error_code}')
 assert data['success'] == False
-assert error_code == 'INVALID_TRANSITION'
-print('   ✅ 正确返回 INVALID_TRANSITION')
+assert error_code == 'WITHDRAWN_FINAL_STATE'
+print('   ✅ 正确返回 WITHDRAWN_FINAL_STATE')
 
 print('\n' + '=' * 70)
 print('验证审计查询过滤')

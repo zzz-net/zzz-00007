@@ -153,10 +153,10 @@ def test_regression():
     })
     data = r.json()
     test3_pass = (not data['success'] and 
-                  data['error']['code'] == 'INVALID_TRANSITION' and
+                  data['error']['code'] == 'WITHDRAWN_FINAL_STATE' and
                   r.status_code == 400)
     all_pass &= print_result(
-        'effective 返回 INVALID_TRANSITION 错误',
+        'effective 返回 WITHDRAWN_FINAL_STATE 错误',
         test3_pass,
         f'返回码: {r.status_code}, 错误码: {data.get("error", {}).get("code")}, 消息: {data.get("error", {}).get("message")}'
     )
